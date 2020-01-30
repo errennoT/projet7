@@ -24,6 +24,7 @@ class ProductController extends AbstractFOSRestController
      *     "product",
      *     converter="fos_rest.request_body"
      * )
+     * @IsGranted("ROLE_SUPER_ADMIN", message="Accès refusé, il faut être super admin afin d'accèder à ces informations")
      */
     public function addProduct(Product $product, ConstraintViolationList $violations)
     {
@@ -41,6 +42,7 @@ class ProductController extends AbstractFOSRestController
     /**
      * @Delete("/admin/supprimer-produit/{id}", name="admin_app_product_delete", requirements = {"id"="\d+"})
      * @View(StatusCode = 200)
+     * @IsGranted("ROLE_SUPER_ADMIN", message="Accès refusé, il faut être super admin afin d'accèder à ces informations")
      */
     public function DeleteProduct(Product $product)
     {

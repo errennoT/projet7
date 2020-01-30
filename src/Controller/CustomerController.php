@@ -27,6 +27,7 @@ class CustomerController extends AbstractFOSRestController
      *     requirements = {"id"="\d+"}
      * )
      * @JMS\View(serializerGroups={"detail_society"})
+     * @IsGranted("ROLE_ADMIN", message="Accès refusé, il faut être admin de la société afin d'accèder à ces informations")
      */
     public function showSociety(Society $society, SecurityManager $securityManager)
     {
@@ -43,6 +44,7 @@ class CustomerController extends AbstractFOSRestController
      *     requirements = {"id"="\d+"}
      * )
      * @JMS\View(serializerGroups={"detail_customer"})
+     * @IsGranted("ROLE_ADMIN", message="Accès refusé, il faut être admin de la société afin d'accèder à ces informations")
      */
     public function showCustomer(User $customer, SecurityManager $securityManager)
     {
@@ -62,6 +64,7 @@ class CustomerController extends AbstractFOSRestController
      *     "customer",
      *     converter="fos_rest.request_body"
      * )
+     * @IsGranted("ROLE_ADMIN", message="Accès refusé, il faut être admin de la société afin d'accèder à ces informations")
      */
     public function addCustomer(User $customer, ConstraintViolationList $violations, Request $request, UserPasswordEncoderInterface $passwordEncoder, SecurityManager $securityManager)
     {
@@ -103,6 +106,7 @@ class CustomerController extends AbstractFOSRestController
     /**
      * @Delete("/supprimer-utilisateur/{id}", name="app_customer_delete", requirements = {"id"="\d+"})
      * @View(StatusCode = 200)
+     * @IsGranted("ROLE_ADMIN", message="Accès refusé, il faut être admin de la société afin d'accèder à ces informations")
      */
     public function DeleteCustomer(User $customer, SecurityManager $securityManager)
     {

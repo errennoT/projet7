@@ -29,6 +29,7 @@ class UserController extends AbstractFOSRestController
      *     "customer",
      *     converter="fos_rest.request_body"
      * )
+     * @IsGranted("ROLE_SUPER_ADMIN", message="Accès refusé, il faut être super admin afin d'accèder à ces informations")
      */
     public function addCustomer(User $customer, ConstraintViolationList $violations, Request $request, UserPasswordEncoderInterface $passwordEncoder)
     {
@@ -74,6 +75,7 @@ class UserController extends AbstractFOSRestController
      *     requirements = {"id"="\d+"}
      * )
      * @JMS\View(serializerGroups={"detail_customer"})
+     * @IsGranted("ROLE_SUPER_ADMIN", message="Accès refusé, il faut être super admin afin d'accèder à ces informations")
      */
     public function showCustomer(User $customer)
     {
@@ -83,6 +85,7 @@ class UserController extends AbstractFOSRestController
     /**
      * @Get("/admin/liste-clients/{page}", name="admin_app_customer_list", requirements = {"page"="\d+"})
      * @JMS\View(serializerGroups={"list_customer"})
+     * @IsGranted("ROLE_SUPER_ADMIN", message="Accès refusé, il faut être super admin afin d'accèder à ces informations")
      */
     public function listCustomers()
     {
@@ -94,6 +97,7 @@ class UserController extends AbstractFOSRestController
     /**
      * @Delete("/admin/supprimer-client/{id}", name="admin_app_customer_delete", requirements = {"id"="\d+"})
      * @View(StatusCode = 200)
+     * @IsGranted("ROLE_SUPER_ADMIN", message="Accès refusé, il faut être super admin afin d'accèder à ces informations")
      */
     public function DeleteCustomer(User $customer)
     {
