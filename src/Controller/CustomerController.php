@@ -22,6 +22,22 @@ class CustomerController extends AbstractFOSRestController
 {
     /**
      * @Get(
+     *     path = "/societe/{id}",
+     *     name = "app_society_show",
+     *     requirements = {"id"="\d+"}
+     * )
+     * @JMS\View(serializerGroups={"detail_society"})
+     */
+    public function showSociety(Society $society, SecurityManager $securityManager)
+    {
+        if ($securityManager->actionSecurity($society->getId())) {
+            return $society;
+        }
+        return $this->view(null, Response::HTTP_UNAUTHORIZED);
+    }
+
+    /**
+     * @Get(
      *     path = "/client/{id}",
      *     name = "app_customer_show",
      *     requirements = {"id"="\d+"}

@@ -43,6 +43,19 @@ class SocietyController extends AbstractFOSRestController
     }
 
     /**
+     * @Get(
+     *     path = "/admin/societe/{id}",
+     *     name = "app_society_show",
+     *     requirements = {"id"="\d+"}
+     * )
+     * @JMS\View(serializerGroups={"detail_society"})
+     */
+    public function showSociety(Society $society)
+    {
+        return $society;
+    }
+
+    /**
      * @Delete("/admin/supprimer-societe/{id}", name="app_society_delete", requirements = {"id"="\d+"})
      * @View(StatusCode = 200)
      */
