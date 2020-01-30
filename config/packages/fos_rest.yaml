@@ -1,0 +1,14 @@
+fos_rest:
+    param_fetcher_listener: force
+    view:
+        view_response_listener:  true
+        formats: { json: true, xml: false, rss: false }
+    format_listener:
+        rules:
+            - { path: ^/, prefer_extension: true, fallback_format: json, priorities: [ json ] }
+    body_converter:
+        validate: true
+        validation_errors_argument: violations
+        enabled: true
+    serializer:
+        serialize_null: true
