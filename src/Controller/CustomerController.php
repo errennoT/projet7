@@ -21,6 +21,22 @@ use FOS\RestBundle\Controller\Annotations\Delete;
 class CustomerController extends AbstractFOSRestController
 {
     /**
+     * @Get(
+     *     path = "/client/{id}",
+     *     name = "app_customer_show",
+     *     requirements = {"id"="\d+"}
+     * )
+     * @JMS\View(serializerGroups={"detail_customer"})
+     */
+    public function showCustomer(User $customer, SecurityManager $securityManager)
+    {
+        if ($securityManager->actionSecurity($customer->getSociety()->getId())) {
+            return $customer;
+        }
+        return $this->view(null, Response::HTTP_UNAUTHORIZED);
+    }
+
+    /**
      * @Post(
      *    path = "/creer-utilisateur",
      *    name = "app_customer_create"
@@ -66,6 +82,23 @@ class CustomerController extends AbstractFOSRestController
         $entityManager->flush();
 
         return $this->view($customer, Response::HTTP_CREATED);
+    }
+
+    /**
+     * @Delete("/supprimer-utilisateur/{id}", name="app_customer_delete", requirements = {"id"="\d+"})
+     * @View(StatusCode = 200)
+     */
+    public function DeleteCustomer(User $customer, SecurityManager $securityManager)
+    {
+        if ($securityManager->actionSecurity($customer->getSociety()->getId())) {
+            $em = $this->getDoctrine()->getManager();
+            $em->remove($customer);
+            $em->flush();
+
+            return $this->view(null, Response::HTTP_OK);
+        }
+
+        return $this->view(null, Response::HTTP_UNAUTHORIZED);
     }
 
 }
