@@ -26,4 +26,15 @@ class ProductController extends AbstractFOSRestController
         return $product;
     }
 
+    /**
+     * @Get("/liste-produits/{page}", name="app_product_list", requirements = {"page"="\d+"})
+     * @JMS\View(serializerGroups={"list_products"})
+     */
+    public function listProducts()
+    {
+        $products = $this->getDoctrine()->getRepository('App\Entity\Product')->findAll();
+        
+        return $products;
+    }
+
 }
