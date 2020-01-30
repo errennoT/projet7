@@ -30,11 +30,11 @@ class ProductController extends AbstractFOSRestController
      * @Get("/liste-produits/{page}", name="app_product_list", requirements = {"page"="\d+"})
      * @JMS\View(serializerGroups={"list_products"})
      */
-    public function listProducts()
+    public function listProducts(PaginatorInterface $paginatorInterface, Request $request, $page)
     {
-        $products = $this->getDoctrine()->getRepository('App\Entity\Product')->findAll();
+        $products = $paginatorInterface->paginate($this->getDoctrine()->getRepository('App\Entity\Product')->findAll(),$request->query->getInt('page',$page),5);
         
-        return $products;
+        return $products->getItems();
     }
 
 }

@@ -61,11 +61,11 @@ class SocietyController extends AbstractFOSRestController
      * @JMS\View(serializerGroups={"list_society"})
      * @IsGranted("ROLE_SUPER_ADMIN", message="Accès refusé, il faut être super admin afin d'accèder à ces informations")
      */
-    public function listSocieties()
+    public function listSocieties(PaginatorInterface $paginatorInterface, Request $request, $page)
     {
-        $societies = $this->getDoctrine()->getRepository('App\Entity\Society')->findAll();
+        $societies = $paginatorInterface->paginate($this->getDoctrine()->getRepository('App\Entity\Society')->findAll(),$request->query->getInt('page',$page),5);
         
-        return $societies;
+        return $societies->getItems();
     }
 
     /**

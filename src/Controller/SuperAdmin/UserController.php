@@ -87,11 +87,11 @@ class UserController extends AbstractFOSRestController
      * @JMS\View(serializerGroups={"list_customer"})
      * @IsGranted("ROLE_SUPER_ADMIN", message="Accès refusé, il faut être super admin afin d'accèder à ces informations")
      */
-    public function listCustomers()
+    public function listCustomers(PaginatorInterface $paginatorInterface, Request $request, $page)
     {
-        $customers = $this->getDoctrine()->getRepository('App\Entity\User')->findAll();
+        $customers = $paginatorInterface->paginate($this->getDoctrine()->getRepository('App\Entity\User')->findAll(),$request->query->getInt('page',$page),5);
 
-        return $customers;
+        return $customers->getItems();
     }
 
     /**
