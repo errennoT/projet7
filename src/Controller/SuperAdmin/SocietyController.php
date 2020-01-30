@@ -56,6 +56,17 @@ class SocietyController extends AbstractFOSRestController
     }
 
     /**
+     * @Get("/admin/liste-societes/{page}", name="app_society_list", requirements = {"page"="\d+"})
+     * @JMS\View(serializerGroups={"list_society"})
+     */
+    public function listSocieties()
+    {
+        $societies = $this->getDoctrine()->getRepository('App\Entity\Society')->findAll();
+        
+        return $societies;
+    }
+
+    /**
      * @Delete("/admin/supprimer-societe/{id}", name="app_society_delete", requirements = {"id"="\d+"})
      * @View(StatusCode = 200)
      */
