@@ -68,6 +68,19 @@ class UserController extends AbstractFOSRestController
     }
 
     /**
+     * @Get(
+     *     path = "/admin/client/{id}",
+     *     name = "admin_app_customer_show",
+     *     requirements = {"id"="\d+"}
+     * )
+     * @JMS\View(serializerGroups={"detail_customer"})
+     */
+    public function showCustomer(User $customer)
+    {
+        return $customer;
+    }
+
+    /**
      * @Delete("/admin/supprimer-client/{id}", name="admin_app_customer_delete", requirements = {"id"="\d+"})
      * @View(StatusCode = 200)
      */
