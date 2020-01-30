@@ -81,6 +81,17 @@ class UserController extends AbstractFOSRestController
     }
 
     /**
+     * @Get("/admin/liste-clients/{page}", name="admin_app_customer_list", requirements = {"page"="\d+"})
+     * @JMS\View(serializerGroups={"list_customer"})
+     */
+    public function listCustomers()
+    {
+        $customers = $this->getDoctrine()->getRepository('App\Entity\User')->findAll();
+
+        return $customers;
+    }
+
+    /**
      * @Delete("/admin/supprimer-client/{id}", name="admin_app_customer_delete", requirements = {"id"="\d+"})
      * @View(StatusCode = 200)
      */
