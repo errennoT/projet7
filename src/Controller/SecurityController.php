@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 class SecurityController extends AbstractController
 {
     /**
-     * @Route(name="/login", path="login_check")
+     * @Route(name="/login", path="/api/login_check")
      * @return JsonResponse
      */
     public function api_login(): JsonResponse
@@ -24,7 +24,7 @@ class SecurityController extends AbstractController
     }
 
     /**
-     * @Route("/logout", name="app_logout")
+     * @Route("/api/logout", name="app_logout")
      */
     public function logout()
     {
