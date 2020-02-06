@@ -6,11 +6,29 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 use JMS\Serializer\Annotation\Groups;
+use Hateoas\Configuration\Annotation as Hateoas;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\ProductRepository")
  * @UniqueEntity("model",
  * message="Le modèle a déjà été ajouté")
+ * @Hateoas\Relation(
+ *      "self",
+ *      href = @Hateoas\Route(
+ *          "app_product_show",
+ *          parameters = { "id" = "expr(object.getId())" },
+ *          absolute = true
+ *      ),
+ *      exclusion = @Hateoas\Exclusion(groups = {"list_products", "detail_product"})
+ * )
+ * @Hateoas\Relation(
+ *      "create",
+ *      href = @Hateoas\Route(
+ *          "admin_app_product_create",
+ *          absolute = true
+ *      ),
+ *      exclusion = @Hateoas\Exclusion(groups = {"detail_product"})
+ * )
  */
 class Product
 {
@@ -18,7 +36,7 @@ class Product
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
-     * @Groups({"list_products"})
+     * @Groups({"list_products", "detail_product"})
      */
     private $id;
 
@@ -30,13 +48,14 @@ class Product
      * minMessage="Le modèle doit contenir au minimun {{ limit }} caractères",
      * maxMessage="Le modèle doit contenir moins de {{ limit }} caractères"
      * )
-     * @Groups({"list_products"})
+     * @Groups({"list_products", "detail_product"})
      */
     private $model;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @Assert\NotBlank()
+     * @Groups({"detail_product"})
      */
     private $size_screen;
 
@@ -54,13 +73,14 @@ class Product
     /**
      * @ORM\Column(type="integer")
      * @Assert\NotBlank()
-     * @Groups({"list_products"})
+     * @Groups({"list_products", "detail_product"})
      */
     private $price;
 
     /**
      * @ORM\Column(type="datetime")
      * @Assert\NotBlank()
+     * @Groups({"detail_product"})
      */
     private $created_at;
 

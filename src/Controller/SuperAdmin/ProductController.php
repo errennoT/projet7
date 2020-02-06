@@ -16,7 +16,7 @@ class ProductController extends AbstractFOSRestController
 {
     /**
      * @Post(
-     *    path = "/admin/creer-produit",
+     *    path = "/api/admin/products",
      *    name = "admin_app_product_create"
      * )
      * @View(StatusCode = 201)
@@ -40,9 +40,9 @@ class ProductController extends AbstractFOSRestController
     }
 
     /**
-     * @Delete("/admin/supprimer-produit/{id}", name="admin_app_product_delete", requirements = {"id"="\d+"})
+     * @Delete("/api/admin/products/{id}", name="admin_app_product_delete", requirements = {"id"="\d+"})
      * @View(StatusCode = 200)
-     * @IsGranted("ROLE_SUPER_ADMIN", message="Accès refusé, il faut être super admin afin d'accèder à ces informations")
+     * @IsGranted("ROLE_SUPER_ADMIN", message="Accès refusé, il faut être super admin afin d'effectuer cette action")
      */
     public function DeleteProduct(Product $product)
     {
@@ -50,6 +50,6 @@ class ProductController extends AbstractFOSRestController
         $em->remove($product);
         $em->flush();
 
-        return $this->view(null, Response::HTTP_OK);
+        return $this->view("Le produit a bien été supprimé", Response::HTTP_OK);
     }
 }

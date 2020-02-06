@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Entity\Society;
 use App\Service\SecurityManager;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,29 +16,14 @@ use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use FOS\RestBundle\Controller\Annotations\Post;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use FOS\RestBundle\Controller\Annotations\Delete;
+use Knp\Component\Pager\PaginatorInterface;
+use FOS\RestBundle\Controller\Annotations\QueryParam;
 
 class CustomerController extends AbstractFOSRestController
 {
     /**
      * @Get(
-     *     path = "/societe/{id}",
-     *     name = "app_society_show",
-     *     requirements = {"id"="\d+"}
-     * )
-     * @JMS\View(serializerGroups={"detail_society"})
-     * @IsGranted("ROLE_ADMIN", message="Accès refusé, il faut être admin de la société afin d'accèder à ces informations")
-     */
-    public function showSociety(Society $society, SecurityManager $securityManager)
-    {
-        if ($securityManager->actionSecurity($society->getId())) {
-            return $society;
-        }
-        return $this->view(null, Response::HTTP_UNAUTHORIZED);
-    }
-
-    /**
-     * @Get(
-     *     path = "/client/{id}",
+     *     path = "/api/customers/{id}",
      *     name = "app_customer_show",
      *     requirements = {"id"="\d+"}
      * )
@@ -51,12 +35,32 @@ class CustomerController extends AbstractFOSRestController
         if ($securityManager->actionSecurity($customer->getSociety()->getId())) {
             return $customer;
         }
-        return $this->view(null, Response::HTTP_UNAUTHORIZED);
+        return $this->view("Erreur: vous n'êtes pas autorisé à voir cet utilisateur", Response::HTTP_UNAUTHORIZED);
+    }
+
+    /**
+     * @Get(
+     *     path = "/api/customers",
+     *     name = "app_customer_list"
+     * )
+     * @QueryParam(
+     *     name="page",
+     *     requirements="[a-zA-Z0-9]+",
+     * )
+     * @JMS\View(serializerGroups={"detail_society"})
+     * @IsGranted("ROLE_ADMIN", message="Accès refusé, il faut être admin de la société afin d'accèder à ces informations")
+     */
+    public function showAllCustomers(SecurityManager $securityManager, PaginatorInterface $paginatorInterface, Request $request, $page)
+    {
+        $society = $securityManager->getSociety();
+        $customerSociety = $paginatorInterface->paginate($this->getDoctrine()->getRepository('App\Entity\User')->findBy(['society' => $society]),$request->query->getInt('page',$page),5);
+        
+        return $customerSociety->getItems();
     }
 
     /**
      * @Post(
-     *    path = "/creer-utilisateur",
+     *    path = "/api/customers",
      *    name = "app_customer_create"
      * )
      * @JMS\View(serializerGroups={"detail_customer"})
@@ -64,7 +68,7 @@ class CustomerController extends AbstractFOSRestController
      *     "customer",
      *     converter="fos_rest.request_body"
      * )
-     * @IsGranted("ROLE_ADMIN", message="Accès refusé, il faut être admin de la société afin d'accèder à ces informations")
+     * @IsGranted("ROLE_ADMIN")
      */
     public function addCustomer(User $customer, ConstraintViolationList $violations, Request $request, UserPasswordEncoderInterface $passwordEncoder, SecurityManager $securityManager)
     {
@@ -88,7 +92,7 @@ class CustomerController extends AbstractFOSRestController
             case "utilisateur":
                 $customer->setRoles(['ROLE_USER']);
                 break;
-            case "admin":
+            case "administrateur":
                 $customer->setRoles(['ROLE_ADMIN']);
                 break;
             default:
@@ -104,7 +108,7 @@ class CustomerController extends AbstractFOSRestController
     }
 
     /**
-     * @Delete("/supprimer-utilisateur/{id}", name="app_customer_delete", requirements = {"id"="\d+"})
+     * @Delete("/api/customers/{id}", name="app_customer_delete", requirements = {"id"="\d+"})
      * @View(StatusCode = 200)
      * @IsGranted("ROLE_ADMIN", message="Accès refusé, il faut être admin de la société afin d'accèder à ces informations")
      */
@@ -115,10 +119,9 @@ class CustomerController extends AbstractFOSRestController
             $em->remove($customer);
             $em->flush();
 
-            return $this->view(null, Response::HTTP_OK);
+            return $this->view("Le compte a bien été supprimé", Response::HTTP_OK);
         }
 
-        return $this->view(null, Response::HTTP_UNAUTHORIZED);
+        return $this->view("Erreur: vous n'êtes pas autorisé à faire cette action", Response::HTTP_UNAUTHORIZED);
     }
-
 }

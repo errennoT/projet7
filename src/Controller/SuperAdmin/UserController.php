@@ -21,7 +21,7 @@ class UserController extends AbstractFOSRestController
 {
     /**
      * @Post(
-     *    path = "/admin/creer-client",
+     *    path = "/api/admin/customers",
      *    name = "admin_app_customer_create"
      * )
      * @JMS\View(serializerGroups={"detail_customer"})
@@ -70,11 +70,11 @@ class UserController extends AbstractFOSRestController
 
     /**
      * @Get(
-     *     path = "/admin/client/{id}",
+     *     path = "/api/admin/customers/{id}",
      *     name = "admin_app_customer_show",
      *     requirements = {"id"="\d+"}
      * )
-     * @JMS\View(serializerGroups={"detail_customer"})
+     * @JMS\View(serializerGroups={"detail_admin_customer"})
      * @IsGranted("ROLE_SUPER_ADMIN", message="Accès refusé, il faut être super admin afin d'accèder à ces informations")
      */
     public function showCustomer(User $customer)
@@ -83,7 +83,7 @@ class UserController extends AbstractFOSRestController
     }
 
     /**
-     * @Get("/admin/liste-clients/{page}", name="admin_app_customer_list", requirements = {"page"="\d+"})
+     * @Get("/api/admin/list-customers/{page}", name="admin_app_customer_list", requirements = {"page"="\d+"})
      * @JMS\View(serializerGroups={"list_customer"})
      * @IsGranted("ROLE_SUPER_ADMIN", message="Accès refusé, il faut être super admin afin d'accèder à ces informations")
      */
@@ -95,9 +95,9 @@ class UserController extends AbstractFOSRestController
     }
 
     /**
-     * @Delete("/admin/supprimer-client/{id}", name="admin_app_customer_delete", requirements = {"id"="\d+"})
+     * @Delete("/api/admin/customers/{id}", name="admin_app_customer_delete", requirements = {"id"="\d+"})
      * @View(StatusCode = 200)
-     * @IsGranted("ROLE_SUPER_ADMIN", message="Accès refusé, il faut être super admin afin d'accèder à ces informations")
+     * @IsGranted("ROLE_SUPER_ADMIN", message="Accès refusé, il faut être super admin afin d'effectuer cette action")
      */
     public function DeleteCustomer(User $customer)
     {
@@ -105,6 +105,6 @@ class UserController extends AbstractFOSRestController
         $em->remove($customer);
         $em->flush();
 
-        return $this->view(null, Response::HTTP_OK);
+        return $this->view("Le client a bien été supprimé", Response::HTTP_OK);
     }
 }

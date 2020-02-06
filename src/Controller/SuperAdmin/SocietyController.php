@@ -20,7 +20,7 @@ class SocietyController extends AbstractFOSRestController
 {
     /**
      * @Post(
-     *    path = "/admin/creer-societe",
+     *    path = "/api/admin/societies",
      *    name = "app_society_create"
      * )
      * @JMS\View(serializerGroups={"list_society"})
@@ -28,6 +28,7 @@ class SocietyController extends AbstractFOSRestController
      *     "society",
      *     converter="fos_rest.request_body"
      * )
+     * @IsGranted("ROLE_SUPER_ADMIN", message="Accès refusé, il faut être super admin afin d'accèder à ces informations")
      */
     public function addSociety(Society $society, ConstraintViolationList $violations)
     {
@@ -44,11 +45,11 @@ class SocietyController extends AbstractFOSRestController
 
     /**
      * @Get(
-     *     path = "/admin/societe/{id}",
+     *     path = "/api/admin/societies/{id}",
      *     name = "app_society_show",
      *     requirements = {"id"="\d+"}
      * )
-     * @JMS\View(serializerGroups={"detail_society"})
+     * @View(serializerGroups={"detail_admin_society"})
      * @IsGranted("ROLE_SUPER_ADMIN", message="Accès refusé, il faut être super admin afin d'accèder à ces informations")
      */
     public function showSociety(Society $society)
@@ -57,7 +58,7 @@ class SocietyController extends AbstractFOSRestController
     }
 
     /**
-     * @Get("/admin/liste-societes/{page}", name="app_society_list", requirements = {"page"="\d+"})
+     * @Get("/api/admin/list-societies/{page}", name="app_society_list", requirements = {"page"="\d+"})
      * @JMS\View(serializerGroups={"list_society"})
      * @IsGranted("ROLE_SUPER_ADMIN", message="Accès refusé, il faut être super admin afin d'accèder à ces informations")
      */
@@ -69,9 +70,9 @@ class SocietyController extends AbstractFOSRestController
     }
 
     /**
-     * @Delete("/admin/supprimer-societe/{id}", name="app_society_delete", requirements = {"id"="\d+"})
+     * @Delete("/api/admin/societies/{id}", name="app_society_delete", requirements = {"id"="\d+"})
      * @View(StatusCode = 200)
-     * @IsGranted("ROLE_SUPER_ADMIN", message="Accès refusé, il faut être super admin afin d'accèder à ces informations")
+     * @IsGranted("ROLE_SUPER_ADMIN", message="Accès refusé, il faut être super admin afin d'effectuer cette action")
      */
     public function DeleteSociety(Society $society)
     {
@@ -79,6 +80,6 @@ class SocietyController extends AbstractFOSRestController
         $em->remove($society);
         $em->flush();
 
-        return $this->view(null, Response::HTTP_OK);
+        return $this->view("La société a bien été supprimée", Response::HTTP_OK);
     }
 }

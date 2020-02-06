@@ -8,11 +8,38 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation\Groups;
+use Hateoas\Configuration\Annotation as Hateoas;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\SocietyRepository")
  * @UniqueEntity("name",
  * message="Le nom de la société a déjà été utilisé")
+ * @Hateoas\Relation(
+ *      "self",
+ *      href = @Hateoas\Route(
+ *          "app_society_show",
+ *          parameters = { "id" = "expr(object.getId())" },
+ *          absolute = true
+ *      ),
+ *      exclusion = @Hateoas\Exclusion(groups = {"detail_admin_society", "list_society"})
+ * )
+ * @Hateoas\Relation(
+ *      "create",
+ *      href = @Hateoas\Route(
+ *          "app_society_create",
+ *          absolute = true
+ *      ),
+ *      exclusion = @Hateoas\Exclusion(groups = "detail_admin_society")
+ * )
+ * @Hateoas\Relation(
+ *      "delete",
+ *      href = @Hateoas\Route(
+ *          "app_society_delete",
+ *          parameters = { "id" = "expr(object.getId())" },
+ *          absolute = true
+ *      ),
+ *      exclusion = @Hateoas\Exclusion(groups = "detail_admin_society")
+ * )
  */
 class Society
 {
@@ -20,7 +47,7 @@ class Society
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
-     * @Groups({"list_society", "detail_society", "detail_customer", "list_customer"})
+     * @Groups({"list_society", "detail_society", "detail_customer", "list_customer", "detail_admin_society", "detail_admin_customer"})
      */
     private $id;
 
@@ -31,13 +58,13 @@ class Society
      * max=50, 
      * minMessage="Le nom de la société doit contenir au minimun {{ limit }} caractères",
      * maxMessage="Le nom de la société contenir moins de {{ limit }} caractères")
-     * @Groups({"list_society", "detail_society", "detail_customer", "list_customer"})
+     * @Groups({"list_society", "detail_society", "detail_customer", "list_customer", "detail_admin_society", "detail_admin_customer"})
      */
     private $name;
 
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\User", mappedBy="society", orphanRemoval=true)
-     * @Groups({"detail", "detail_society"})
+     * @Groups({"detail", "detail_society", "detail_admin_society"})
      */
     private $user;
 

@@ -7,11 +7,64 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use JMS\Serializer\Annotation\Groups;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
+use Hateoas\Configuration\Annotation as Hateoas;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
  * @UniqueEntity("username",
  * message="Le nom du client a déjà été utilisé")
+ * @Hateoas\Relation(
+ *      "self",
+ *      href = @Hateoas\Route(
+ *          "app_customer_show",
+ *          parameters = { "id" = "expr(object.getId())" },
+ *          absolute = true
+ *      ),
+ *      exclusion = @Hateoas\Exclusion(groups = {"detail_society", "detail_customer"})
+ * )
+ * @Hateoas\Relation(
+ *      "self",
+ *      href = @Hateoas\Route(
+ *          "admin_app_customer_show",
+ *          parameters = { "id" = "expr(object.getId())" },
+ *          absolute = true
+ *      ),
+ *      exclusion = @Hateoas\Exclusion(groups = {"detail_admin_customer"})
+ * )
+ * @Hateoas\Relation(
+ *      "create",
+ *      href = @Hateoas\Route(
+ *          "app_customer_create",
+ *          absolute = true
+ *      ),
+ *      exclusion = @Hateoas\Exclusion(groups = {"detail_customer"})
+ * )
+ * @Hateoas\Relation(
+ *      "create",
+ *      href = @Hateoas\Route(
+ *          "admin_app_customer_create",
+ *          absolute = true
+ *      ),
+ *      exclusion = @Hateoas\Exclusion(groups = {"detail_admin_customer"})
+ * )
+ * @Hateoas\Relation(
+ *      "delete",
+ *      href = @Hateoas\Route(
+ *          "app_customer_delete",
+ *          parameters = { "id" = "expr(object.getId())" },
+ *          absolute = true
+ *      ),
+ *      exclusion = @Hateoas\Exclusion(groups = {"detail_customer"})
+ * )
+ * @Hateoas\Relation(
+ *      "delete",
+ *      href = @Hateoas\Route(
+ *          "admin_app_customer_delete",
+ *          parameters = { "id" = "expr(object.getId())" },
+ *          absolute = true
+ *      ),
+ *      exclusion = @Hateoas\Exclusion(groups = {"detail_admin_customer"})
+ * )
  */
 class User implements UserInterface
 {
@@ -19,7 +72,7 @@ class User implements UserInterface
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
-     * @Groups({"list_customer", "detail_society", "detail_customer"})
+     * @Groups({"list_customer", "detail_society", "detail_customer", "detail_admin_society", "detail_admin_customer"})
      */
     private $id;
 
@@ -30,13 +83,13 @@ class User implements UserInterface
      * max=30, 
      * minMessage="Le nom du client doit contenir au minimun {{ limit }} caractères",
      * maxMessage="Le nom du client doit contenir moins de {{ limit }} caractères")
-     * @Groups({"list_customer", "detail_society", "detail_customer"})
+     * @Groups({"list_customer", "detail_society", "detail_customer", "detail_admin_society", "detail_admin_customer"})
      */
     private $username;
 
     /**
      * @ORM\Column(type="json")
-     * @Groups({"list_customer", "detail_society", "detail_customer"})
+     * @Groups({"list_customer", "detail_society", "detail_customer", "detail_admin_society", "detail_admin_customer"})
      */
     private $roles = [];
 
@@ -48,9 +101,9 @@ class User implements UserInterface
     private $password;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Society", inversedBy="customer")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Society", inversedBy="customer", cascade={"persist"})
      * @ORM\JoinColumn(nullable=false)
-     * @Groups({"detail_customer", "list_customer"})
+     * @Groups({"detail_customer", "list_customer", "detail_admin_customer"})
      */
     private $society;
 
