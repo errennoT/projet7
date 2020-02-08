@@ -7,6 +7,10 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 use JMS\Serializer\Annotation\Groups;
 use Hateoas\Configuration\Annotation as Hateoas;
+use JMS\Serializer\Annotation\Exclude;
+use JMS\Serializer\Annotation\ExclusionPolicy;
+use JMS\Serializer\Annotation\Expose;
+use JMS\Serializer\Annotation as Serializer;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\ProductRepository")
@@ -20,14 +24,6 @@ use Hateoas\Configuration\Annotation as Hateoas;
  *          absolute = true
  *      ),
  *      exclusion = @Hateoas\Exclusion(groups = {"list_products", "detail_product"})
- * )
- * @Hateoas\Relation(
- *      "create",
- *      href = @Hateoas\Route(
- *          "admin_app_product_create",
- *          absolute = true
- *      ),
- *      exclusion = @Hateoas\Exclusion(groups = {"detail_product"})
  * )
  */
 class Product
