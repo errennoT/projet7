@@ -18,19 +18,34 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use FOS\RestBundle\Controller\Annotations\Delete;
 use Knp\Component\Pager\PaginatorInterface;
 use FOS\RestBundle\Controller\Annotations\QueryParam;
+use Hateoas\Representation\PaginatedRepresentation;
+use Hateoas\Representation\CollectionRepresentation;
+use JMS\Serializer\SerializerInterface;
+use JMS\Serializer\SerializationContext;
 
 class CustomerController extends AbstractFOSRestController
 {
+    private $serialize;
+
+    public function __construct(SerializerInterface $serialize)
+    {
+        $this->serialize = $serialize;
+    }
+
     /**
      * @Get(
      *     path = "/api/customers/{id}",
      *     name = "app_customer_show",
      *     requirements = {"id"="\d+"}
      * )
-     * @JMS\View(serializerGroups={"detail_customer"})
+     * @QueryParam(
+     *     name="page",
+     *     requirements="[a-zA-Z0-9]+",
+     * )
+     * @JMS\View(serializerGroups={"detail_society"})
      * @IsGranted("ROLE_ADMIN", message="Accès refusé, il faut être admin de la société afin d'accèder à ces informations")
      */
-    public function showCustomer(User $customer, SecurityManager $securityManager)
+    public function showAllCustomers(SecurityManager $securityManager, PaginatorInterface $paginatorInterface, Request $request, $page)
     {
         if ($securityManager->actionSecurity($customer->getSociety()->getId())) {
             return $customer;
@@ -47,15 +62,40 @@ class CustomerController extends AbstractFOSRestController
      *     name="page",
      *     requirements="[a-zA-Z0-9]+",
      * )
-     * @JMS\View(serializerGroups={"detail_society"})
+     * @QueryParam(
+     *     name="limit",
+     *     requirements="[a-zA-Z0-9]+",
+     * )
+     * @View
      * @IsGranted("ROLE_ADMIN", message="Accès refusé, il faut être admin de la société afin d'accèder à ces informations")
      */
-    public function showAllCustomers(SecurityManager $securityManager, PaginatorInterface $paginatorInterface, Request $request, $page)
+    public function showAllCustomers(SecurityManager $securityManager, PaginatorInterface $paginatorInterface, Request $request, $page, $limit)
     {
         $society = $securityManager->getSociety();
-        $customerSociety = $paginatorInterface->paginate($this->getDoctrine()->getRepository('App\Entity\User')->findBy(['society' => $society]),$request->query->getInt('page',$page),5);
-        
-        return $customerSociety->getItems();
+        $allCustomers = $this->getDoctrine()->getRepository('App\Entity\User')->findBy(['society' => $society]);
+
+        $totalCustomers = count($allCustomers);
+        $totalPages = ($totalCustomers / $limit);
+
+        $filterDataCustomers = $this->serialize->serialize($allCustomers, 'json', SerializationContext::create()->setGroups(array('detail_society')));
+        $filterCustomer = json_decode($filterDataCustomers, true);
+
+        $customerSociety = $paginatorInterface->paginate($filterCustomer, $request->query->getInt('page', $page), $limit);
+
+        $paginatedCollection = new PaginatedRepresentation(
+            new CollectionRepresentation($customerSociety),
+            'app_product_list',
+            array(),
+            $page,
+            $limit,
+            $totalPages,
+            'page',
+            'limit',
+            true,
+            $totalCustomers
+        );
+
+        return $paginatedCollection;
     }
 
     /**

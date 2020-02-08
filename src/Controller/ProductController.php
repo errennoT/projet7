@@ -3,19 +3,26 @@
 namespace App\Controller;
 
 use App\Entity\Product;
-
 use FOS\RestBundle\Controller\Annotations\View;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations\Get;
-use FOS\RestBundle\Controller\Annotations as JMS;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Hateoas\Representation\PaginatedRepresentation;
 use Hateoas\Representation\CollectionRepresentation;
 use FOS\RestBundle\Controller\Annotations\QueryParam;
+use JMS\Serializer\SerializerInterface;
+use JMS\Serializer\SerializationContext;
 
 class ProductController extends AbstractFOSRestController
 {
+    private $serialize;
+
+    public function __construct(SerializerInterface $serialize)
+    {
+        $this->serialize = $serialize;
+    }
+
     /**
      * @Get(
      *     path = "/api/products/{id}",
@@ -39,27 +46,31 @@ class ProductController extends AbstractFOSRestController
      *     name="limit",
      *     requirements="[a-zA-Z0-9]+",
      * )
-     * @JMS\View(serializerGroups={"list_products"})
+     * @View
      */
     public function listProducts(PaginatorInterface $paginatorInterface, Request $request, $page, $limit)
     {
         $allProducts = $this->getDoctrine()->getRepository('App\Entity\Product')->findAll();
+
         $totalProducts = count($allProducts);
         $totalPages = ($totalProducts / $limit);
 
-        $products = $paginatorInterface->paginate($this->getDoctrine()->getRepository('App\Entity\Product')->findAll(), $request->query->getInt('page', $page), $limit);
-        
+        $filterDataProducts = $this->serialize->serialize($allProducts, 'json', SerializationContext::create()->setGroups(array('list_products')));
+        $filterProduct = json_decode($filterDataProducts, true);
+
+        $products = $paginatorInterface->paginate($filterProduct, $request->query->getInt('page', $page), $limit);
+
         $paginatedCollection = new PaginatedRepresentation(
             new CollectionRepresentation($products),
-            'app_product_list', 
-            array(), 
-            $page,      
-            $limit,     
-            $totalPages,       
-            'page',  
-            'limit', 
-            true,   
-            $totalProducts    
+            'app_product_list',
+            array(),
+            $page,
+            $limit,
+            $totalPages,
+            'page',
+            'limit',
+            true,
+            $totalProducts
         );
 
         return $paginatedCollection;
