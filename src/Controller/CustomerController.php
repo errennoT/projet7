@@ -34,27 +34,6 @@ class CustomerController extends AbstractFOSRestController
 
     /**
      * @Get(
-     *     path = "/api/customers/{id}",
-     *     name = "app_customer_show",
-     *     requirements = {"id"="\d+"}
-     * )
-     * @QueryParam(
-     *     name="page",
-     *     requirements="[a-zA-Z0-9]+",
-     * )
-     * @JMS\View(serializerGroups={"detail_society"})
-     * @IsGranted("ROLE_ADMIN", message="Accès refusé, il faut être admin de la société afin d'accèder à ces informations")
-     */
-    public function showAllCustomers(SecurityManager $securityManager, PaginatorInterface $paginatorInterface, Request $request, $page)
-    {
-        if ($securityManager->actionSecurity($customer->getSociety()->getId())) {
-            return $customer;
-        }
-        return $this->view("Erreur: vous n'êtes pas autorisé à voir cet utilisateur", Response::HTTP_UNAUTHORIZED);
-    }
-
-    /**
-     * @Get(
      *     path = "/api/customers",
      *     name = "app_customer_list"
      * )
