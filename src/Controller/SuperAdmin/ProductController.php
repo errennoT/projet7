@@ -11,6 +11,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\ConstraintViolationList;
 use FOS\RestBundle\Controller\Annotations\Delete;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Swagger\Annotations as SWG;
+use Nelmio\ApiDocBundle\Annotation\Model;
 
 class ProductController extends AbstractFOSRestController
 {
@@ -25,6 +27,22 @@ class ProductController extends AbstractFOSRestController
      *     converter="fos_rest.request_body"
      * )
      * @IsGranted("ROLE_SUPER_ADMIN", message="Accès refusé, il faut être super admin afin d'accèder à ces informations")
+     * @SWG\Parameter(
+     *     name="Ajouter un produit",
+     *     in="body",
+     *     description="Ajouter un produit",
+     *     @Model(type=Product::class, groups={"addproduct"})
+     * )
+     * 
+     * @SWG\Response(
+     *     response=201,
+     *     description="Ajouter un produit",
+     *     @SWG\Schema(
+     *         type="array",
+     *         @SWG\Items(ref=@Model(type=Product::class))
+     *     )
+     * )
+     * @SWG\Tag(name="SuperAdmin Product")
      */
     public function addProduct(Product $product, ConstraintViolationList $violations)
     {
@@ -43,13 +61,28 @@ class ProductController extends AbstractFOSRestController
      * @Delete("/api/admin/products/{id}", name="admin_app_product_delete", requirements = {"id"="\d+"})
      * @View(StatusCode = 200)
      * @IsGranted("ROLE_SUPER_ADMIN", message="Accès refusé, il faut être super admin afin d'effectuer cette action")
+     * @SWG\Parameter(
+     *     name="id",
+     *     in="path",
+     *     type="integer",
+     *     description="L'id du produit"
+     * )
+     * @SWG\Response(
+     *     response=200,
+     *     description="Supprime un produit",
+     * )
+     * @SWG\Tag(name="SuperAdmin Product")
      */
-    public function DeleteProduct(Product $product)
+    public function DeleteProduct(Product $product = null, $id)
     {
-        $em = $this->getDoctrine()->getManager();
-        $em->remove($product);
-        $em->flush();
+        if ($product) {
+            $em = $this->getDoctrine()->getManager();
+            $em->remove($product);
+            $em->flush();
 
-        return $this->view("Le produit a bien été supprimé", Response::HTTP_OK);
+            return $this->view("Le produit a bien été supprimé", Response::HTTP_OK);
+        }
+
+        return $this->view("Aucun produit trouvé avec l'id $id", Response::HTTP_NOT_FOUND);
     }
 }

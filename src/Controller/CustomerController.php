@@ -22,6 +22,8 @@ use Hateoas\Representation\PaginatedRepresentation;
 use Hateoas\Representation\CollectionRepresentation;
 use JMS\Serializer\SerializerInterface;
 use JMS\Serializer\SerializationContext;
+use Swagger\Annotations as SWG;
+use Nelmio\ApiDocBundle\Annotation\Model;
 
 class CustomerController extends AbstractFOSRestController
 {
@@ -40,13 +42,32 @@ class CustomerController extends AbstractFOSRestController
      * )
      * @JMS\View(serializerGroups={"detail_customer"})
      * @IsGranted("ROLE_ADMIN", message="Accès refusé, il faut être admin de la société afin d'accèder à ces informations")
+     * @SWG\Parameter(
+     *     name="id",
+     *     in="path",
+     *     type="integer",
+     *     description="L'id du client"
+     * )
+     * @SWG\Response(
+     *     response=200,
+     *     description="Renvoie le détail d'un client",
+     *     @SWG\Schema(
+     *         type="array",
+     *         @SWG\Items(ref=@Model(type=User::class))
+     *     )
+     * )
+     * @SWG\Tag(name="Admin Customer")
      */
-    public function showCustomer(User $customer, SecurityManager $securityManager)
+    public function showCustomer(User $customer = null, SecurityManager $securityManager, $id)
     {
-        if ($securityManager->actionSecurity($customer->getSociety()->getId())) {
-            return $customer;
+        if ($customer) {
+            if ($securityManager->actionSecurity($customer->getSociety()->getId())) {
+                return $customer;
+            }
+            return $this->view("Erreur: vous n'êtes pas autorisé à voir cet utilisateur", Response::HTTP_UNAUTHORIZED);
         }
-        return $this->view("Erreur: vous n'êtes pas autorisé à voir cet utilisateur", Response::HTTP_UNAUTHORIZED);
+
+        return $this->view("Aucun client trouvé avec l'id $id", Response::HTTP_NOT_FOUND);
     }
 
     /**
@@ -64,6 +85,27 @@ class CustomerController extends AbstractFOSRestController
      * )
      * @View
      * @IsGranted("ROLE_ADMIN", message="Accès refusé, il faut être admin de la société afin d'accèder à ces informations")
+     * @SWG\Parameter(
+     *     name="page",
+     *     in="query",
+     *     type="integer",
+     *     description="Selectionne la page"
+     * )
+     * @SWG\Parameter(
+     *     name="limit",
+     *     in="query",
+     *     type="integer",
+     *     description="Limite le nombre de résultat par page"
+     * )
+     * @SWG\Response(
+     *     response=200,
+     *     description="Renvoie la liste des clients",
+     *     @SWG\Schema(
+     *         type="array",
+     *         @SWG\Items(ref=@Model(type=User::class))
+     *     )
+     * )
+     * @SWG\Tag(name="Admin Customer")
      */
     public function showAllCustomers(SecurityManager $securityManager, PaginatorInterface $paginatorInterface, Request $request, $page, $limit)
     {
@@ -84,7 +126,7 @@ class CustomerController extends AbstractFOSRestController
             array(),
             $page,
             $limit,
-            $totalPages,
+            ceil($totalPages),
             'page',
             'limit',
             true,
@@ -96,7 +138,7 @@ class CustomerController extends AbstractFOSRestController
 
     /**
      * @Post(
-     *    path = "/api/customers",
+     *    path = "/api/customers/user",
      *    name = "app_customer_create"
      * )
      * @JMS\View(serializerGroups={"detail_customer"})
@@ -105,14 +147,25 @@ class CustomerController extends AbstractFOSRestController
      *     converter="fos_rest.request_body"
      * )
      * @IsGranted("ROLE_ADMIN")
+     * 
+     * @SWG\Parameter(
+     *     name="Créer un client utilisateur",
+     *     in="body",
+     *     description="Rentrer l'username et le password",
+     *     @Model(type=User::class, groups={"adduser"})
+     * )
+     * 
+     * @SWG\Response(
+     *     response=201,
+     *     description="Créer un client utilisateur",
+     * )
+     * @SWG\Tag(name="Admin Customer")
      */
-    public function addCustomer(User $customer, ConstraintViolationList $violations, Request $request, UserPasswordEncoderInterface $passwordEncoder, SecurityManager $securityManager)
+    public function addCustomerUser(User $customer, ConstraintViolationList $violations, UserPasswordEncoderInterface $passwordEncoder, SecurityManager $securityManager)
     {
         if (count($violations)) {
             return $this->view($violations, Response::HTTP_BAD_REQUEST);
         }
-
-        $customerContent = $request->request->All();
 
         $customerSociety = $securityManager->getSociety();
         $customer->setSociety($customerSociety);
@@ -124,17 +177,58 @@ class CustomerController extends AbstractFOSRestController
             )
         );
 
-        switch ($customerContent['role']) {
-            case "utilisateur":
-                $customer->setRoles(['ROLE_USER']);
-                break;
-            case "administrateur":
-                $customer->setRoles(['ROLE_ADMIN']);
-                break;
-            default:
-                $customer->setRoles(['ROLE_USER']);
-                break;
+        $customer->setRoles(['ROLE_USER']);
+
+        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager->persist($customer);
+        $entityManager->flush();
+
+        return $this->view($customer, Response::HTTP_CREATED);
+    }
+
+    /**
+     * @Post(
+     *    path = "/api/customers/admin",
+     *    name = "app_customer_create_admin"
+     * )
+     * @JMS\View(serializerGroups={"detail_customer"})
+     * @ParamConverter(
+     *     "customer",
+     *     converter="fos_rest.request_body"
+     * )
+     * @IsGranted("ROLE_ADMIN")
+     * 
+     * @SWG\Parameter(
+     *     name="Créer un client administrateur",
+     *     in="body",
+     *     description="Rentrer l'username et le password",
+     *     @Model(type=User::class, groups={"adduser"})
+     * )
+     * 
+     * @SWG\Response(
+     *     response=201,
+     *     description="Créer un client administrateur",
+     *     )
+     * )
+     * @SWG\Tag(name="Admin Customer")
+     */
+    public function addCustomerAdmin(User $customer, ConstraintViolationList $violations, UserPasswordEncoderInterface $passwordEncoder, SecurityManager $securityManager)
+    {
+        if (count($violations)) {
+            return $this->view($violations, Response::HTTP_BAD_REQUEST);
         }
+
+        $customerSociety = $securityManager->getSociety();
+        $customer->setSociety($customerSociety);
+
+        $customer->setPassword(
+            $passwordEncoder->encodePassword(
+                $customer,
+                $customer->getPassword()
+            )
+        );
+
+        $customer->setRoles(['ROLE_ADMIN']);
 
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->persist($customer);
@@ -147,17 +241,32 @@ class CustomerController extends AbstractFOSRestController
      * @Delete("/api/customers/{id}", name="app_customer_delete", requirements = {"id"="\d+"})
      * @View(StatusCode = 200)
      * @IsGranted("ROLE_ADMIN", message="Accès refusé, il faut être admin de la société afin d'accèder à ces informations")
+     * @SWG\Parameter(
+     *     name="id",
+     *     in="path",
+     *     type="integer",
+     *     description="L'id du client"
+     * )
+     * @SWG\Response(
+     *     response=200,
+     *     description="Supprimer un client",
+     * )
+     * @SWG\Tag(name="Admin Customer")
      */
-    public function DeleteCustomer(User $customer, SecurityManager $securityManager)
+    public function DeleteCustomer(User $customer = null, SecurityManager $securityManager, $id)
     {
-        if ($securityManager->actionSecurity($customer->getSociety()->getId())) {
-            $em = $this->getDoctrine()->getManager();
-            $em->remove($customer);
-            $em->flush();
+        if ($customer) {
+            if ($securityManager->actionSecurity($customer->getSociety()->getId())) {
+                $em = $this->getDoctrine()->getManager();
+                $em->remove($customer);
+                $em->flush();
 
-            return $this->view("Le compte a bien été supprimé", Response::HTTP_OK);
+                return $this->view("Le compte a bien été supprimé", Response::HTTP_OK);
+            }
+
+            return $this->view("Erreur: vous n'êtes pas autorisé à faire cette action", Response::HTTP_UNAUTHORIZED);
         }
 
-        return $this->view("Erreur: vous n'êtes pas autorisé à faire cette action", Response::HTTP_UNAUTHORIZED);
+        return $this->view("Aucun client trouvé avec l'id $id", Response::HTTP_NOT_FOUND);
     }
 }

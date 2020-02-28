@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Product;
+use Symfony\Component\HttpFoundation\Response;
 use FOS\RestBundle\Controller\Annotations\View;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations\Get;
@@ -13,6 +14,8 @@ use Hateoas\Representation\CollectionRepresentation;
 use FOS\RestBundle\Controller\Annotations\QueryParam;
 use JMS\Serializer\SerializerInterface;
 use JMS\Serializer\SerializationContext;
+use Nelmio\ApiDocBundle\Annotation\Model;
+use Swagger\Annotations as SWG;
 
 class ProductController extends AbstractFOSRestController
 {
@@ -30,10 +33,29 @@ class ProductController extends AbstractFOSRestController
      *     requirements = {"id"="\d+"}
      * )
      * @View
+     * @SWG\Parameter(
+     *     name="id",
+     *     in="path",
+     *     type="integer",
+     *     description="L'id du produit"
+     * )
+     * @SWG\Response(
+     *     response=200,
+     *     description="Renvoie le détail d'un produit",
+     *     @SWG\Schema(
+     *         type="array",
+     *         @SWG\Items(ref=@Model(type=Product::class))
+     *     )
+     * )
+     * @SWG\Tag(name="Products")
      */
-    public function showProduct(Product $product)
+    public function showProduct(Product $product = null, $id)
     {
-        return $product;
+        if ($product) {
+            return $product;
+        }
+
+        return $this->view("Aucun produit trouvé avec l'id $id", Response::HTTP_NOT_FOUND);
     }
 
     /**
@@ -47,6 +69,23 @@ class ProductController extends AbstractFOSRestController
      *     requirements="[a-zA-Z0-9]+",
      * )
      * @View
+     * @SWG\Parameter(
+     *     name="page",
+     *     in="query",
+     *     type="integer",
+     *     description="Selectionne la page"
+     * )
+     * @SWG\Parameter(
+     *     name="limit",
+     *     in="query",
+     *     type="integer",
+     *     description="Limite le nombre de résultat par page"
+     * )
+     * @SWG\Response(
+     *     response=200,
+     *     description="Renvoie la liste des produits",
+     * )
+     * @SWG\Tag(name="Products")
      */
     public function listProducts(PaginatorInterface $paginatorInterface, Request $request, $page, $limit)
     {
@@ -66,7 +105,7 @@ class ProductController extends AbstractFOSRestController
             array(),
             $page,
             $limit,
-            $totalPages,
+            ceil($totalPages),
             'page',
             'limit',
             true,

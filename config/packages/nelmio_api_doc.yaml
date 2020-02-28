@@ -1,0 +1,19 @@
+nelmio_api_doc:
+    documentation:
+        info:
+            title: BileMo
+            description: API by BileMo
+            version: 1.0.0
+        securityDefinitions:
+            Bearer:
+                type: apiKey
+                description: 'Value: Bearer {jwt}'
+                name: Authorization
+                in: header
+        security:
+            - Bearer: []
+            
+    areas: # to filter documented areas
+        default:
+            path_patterns: [ ^/api/customers, ^/api/admin, ^/api/products, ^/api/login_check ]
+
