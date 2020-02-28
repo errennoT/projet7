@@ -40,7 +40,11 @@ class CustomerController extends AbstractFOSRestController
      *     name = "app_customer_show",
      *     requirements = {"id"="\d+"}
      * )
-     * @JMS\View(serializerGroups={"detail_customer"})
+     * @QueryParam(
+     *     name="page",
+     *     requirements="[a-zA-Z0-9]+",
+     * )
+     * @JMS\View(serializerGroups={"detail_society"})
      * @IsGranted("ROLE_ADMIN", message="Accès refusé, il faut être admin de la société afin d'accèder à ces informations")
      * @SWG\Parameter(
      *     name="id",

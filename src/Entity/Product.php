@@ -12,6 +12,7 @@ use JMS\Serializer\Annotation\ExclusionPolicy;
 use JMS\Serializer\Annotation\Expose;
 use JMS\Serializer\Annotation as Serializer;
 
+
 /**
  * @ORM\Entity(repositoryClass="App\Repository\ProductRepository")
  * @UniqueEntity("model",
