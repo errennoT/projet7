@@ -44,14 +44,14 @@ class Product
      * minMessage="Le modèle doit contenir au minimun {{ limit }} caractères",
      * maxMessage="Le modèle doit contenir moins de {{ limit }} caractères"
      * )
-     * @Groups({"list_products", "detail_product"})
+     * @Groups({"list_products", "detail_product", "addproduct"})
      */
     private $model;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @Assert\NotBlank()
-     * @Groups({"detail_product"})
+     * @Groups({"detail_product", "addproduct"})
      */
     private $size_screen;
 
@@ -63,20 +63,21 @@ class Product
      * minMessage="La couleur doit contenir au minimun {{ limit }} caractères",
      * maxMessage="La couleur doit contenir moins de {{ limit }} caractères"
      * )
+     * @Groups({"addproduct"})
      */
     private $color;
 
     /**
      * @ORM\Column(type="integer")
      * @Assert\NotBlank()
-     * @Groups({"list_products", "detail_product"})
+     * @Groups({"list_products", "detail_product", "addproduct"})
      */
     private $price;
 
     /**
      * @ORM\Column(type="datetime")
      * @Assert\NotBlank()
-     * @Groups({"detail_product"})
+     * @Groups({"detail_product", "addproduct"})
      */
     private $created_at;
 

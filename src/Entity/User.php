@@ -83,7 +83,7 @@ class User implements UserInterface
      * max=30, 
      * minMessage="Le nom du client doit contenir au minimun {{ limit }} caractères",
      * maxMessage="Le nom du client doit contenir moins de {{ limit }} caractères")
-     * @Groups({"list_customer", "detail_society", "detail_customer", "detail_admin_society", "detail_admin_customer"})
+     * @Groups({"list_customer", "detail_society", "detail_customer", "detail_admin_society", "detail_admin_customer", "adduser", "login", "addusersuperadmin"})
      */
     private $username;
 
@@ -97,13 +97,14 @@ class User implements UserInterface
      * @var string The hashed password
      * @Assert\NotBlank()
      * @ORM\Column(type="string")
+     * @Groups({"adduser", "login", "addusersuperadmin"})
      */
     private $password;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Society", inversedBy="customer", cascade={"persist"})
      * @ORM\JoinColumn(nullable=false)
-     * @Groups({"detail_customer", "list_customer", "detail_admin_customer"})
+     * @Groups({"detail_customer", "list_customer", "detail_admin_customer", "detail_admin_customer", "addusersuperadmin"})
      */
     private $society;
 

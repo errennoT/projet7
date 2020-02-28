@@ -58,7 +58,7 @@ class Society
      * max=50, 
      * minMessage="Le nom de la société doit contenir au minimun {{ limit }} caractères",
      * maxMessage="Le nom de la société contenir moins de {{ limit }} caractères")
-     * @Groups({"list_society", "detail_society", "detail_customer", "list_customer", "detail_admin_society", "detail_admin_customer"})
+     * @Groups({"list_society", "detail_society", "detail_customer", "list_customer", "detail_admin_society", "detail_admin_customer", "addsociety", "addusersuperadmin"})
      */
     private $name;
 
