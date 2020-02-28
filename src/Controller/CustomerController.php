@@ -33,18 +33,14 @@ class CustomerController extends AbstractFOSRestController
     {
         $this->serialize = $serialize;
     }
-
-    /**
+    
+     /**
      * @Get(
      *     path = "/api/customers/{id}",
      *     name = "app_customer_show",
      *     requirements = {"id"="\d+"}
      * )
-     * @QueryParam(
-     *     name="page",
-     *     requirements="[a-zA-Z0-9]+",
-     * )
-     * @JMS\View(serializerGroups={"detail_society"})
+     * @JMS\View(serializerGroups={"detail_customer"})
      * @IsGranted("ROLE_ADMIN", message="Accès refusé, il faut être admin de la société afin d'accèder à ces informations")
      * @SWG\Parameter(
      *     name="id",
